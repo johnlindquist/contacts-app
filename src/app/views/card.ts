@@ -9,7 +9,7 @@ import {ContactService} from "../services/contacts-service";
 @Component({
   directives: [ContactCard, ContactEdit],
   template: `
-    <div [ngSwitch]="state">
+    <div [ngSwitch]="routeData.get('state')">
       <contact-card
         *ngSwitchWhen="'view'"
         [contact]="service.selectedContactStore | async"
@@ -19,7 +19,7 @@ import {ContactService} from "../services/contacts-service";
       <contact-edit
         *ngSwitchWhen="'edit'"
         [contact]="service.selectedContactStore | async"
-
+        (update)="onUpdate($event)"
       >
       </contact-edit>
     </div>
@@ -28,19 +28,27 @@ import {ContactService} from "../services/contacts-service";
 export class Card {
   state;
 
-  onEdit(contact){
-    console.log('contact', this.router);
-    this.router.navigate(['../ContactEdit', {id:contact.id}])
+  /*
+   We reuse this `Card` for all the card related routes
+   This prevents the router from caching the card
+   */
+  routerCanReuse() {
+    return false;
+  }
+
+  onEdit(contact) {
+    this.router.navigate(['../ContactEdit', {id: contact.id}])
+  }
+
+  onUpdate(event){
+    this.service.putContact.subscribe((contact)=>{
+      this.router.navigate(['../ContactCard', {id:contact.id}])
+    });
+
+    this.service.putContactSubject.next(event);
   }
 
   constructor(routeParams:RouteParams, public service:ContactService, public routeData:RouteData, public router:Router) {
-    console.log('card', routeData.get('state'));
-
-    this.state = routeData.get('state');
-
-    if(this.state == 'view'){
-      const id = routeParams.get('id');
-      service.loadContactSubject.next(id);
-    }
+    service.loadContactSubject.next(routeParams.get('id'));
   }
 }

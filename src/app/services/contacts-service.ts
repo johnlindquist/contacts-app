@@ -2,16 +2,16 @@ import {Injectable} from "angular2/core";
 import {ReplaySubject} from "rxjs/subject/ReplaySubject";
 import {BehaviorSubject} from "rxjs/subject/BehaviorSubject";
 import {Subject} from "rxjs/Subject";
-import {Http} from "angular2/http";
-import {Headers} from "angular2/http";
+import {Http, Headers, Response} from "angular2/http";
+
 import "rxjs/Rx";
+
 
 @Injectable()
 export class ContactService {
   static BASE_URL = `http://localhost:3000/people`;
 
   contactsStore = new ReplaySubject(1);
-
   contactsSubject = new BehaviorSubject([]);
 
   contacts = this.contactsSubject.mergeMap((val:any)=> {
@@ -52,25 +52,36 @@ export class ContactService {
   loadContact = this.loadContactSubject
     .mergeMap((id)=> this.http
       .get(`${ContactService.BASE_URL}/${id}`)
-      .map(res => res.json()));
+      .map((res:Response) => res.json()));
+
+
+
+  putContactSubject = new Subject();
+  putContact = this.putContactSubject
+    .mergeMap((contact)=> {
+      return this.http
+      .put(
+        `${ContactService.BASE_URL}/${contact.id}`,
+        JSON.stringify(contact),
+        {
+          headers: new Headers({
+            'Content-Type': 'application/json'
+          })
+        })
+      .map((res:Response) => res.json())});
+
 
   constructor(public http:Http) {
-    /*
-     1. `newContact` is Observing `newContactSubject` which is
-     called above. So a `newContactSubject.next()` flows to a
-     `newContact.subscribe()`.
 
-     2. `contactsSubject` is the ReplaySubject which stores the
-     data.
-
-     When you `.subscribe(subject)`, it calls `.next()` on the
-     `subject`. In our case, `contactsSubject` triggers the
-     `http.get` all contacts request.
-     */
+    //When I create or update a contact, I want to refresh the contacts
     this.newContact
       .subscribe(this.contactsSubject);
 
-    this.loadContact.subscribe(this.selectedContactStore);
+    this.putContact
+      .subscribe(this.contactsSubject);
+
+    this.loadContact
+      .subscribe(this.selectedContactStore);
   }
 }
 
