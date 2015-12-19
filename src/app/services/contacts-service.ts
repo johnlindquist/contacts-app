@@ -12,7 +12,7 @@ export class ContactService {
   static BASE_URL = `http://localhost:3000/people`;
   static RANDOM_URL = `http://localhost:3000/random`;
 
-  contactsStore = new Subject(1);
+  contactsStore = new ReplaySubject(1);
   contactsSubject = new BehaviorSubject([]);
 
   selectedContactStore = new Subject();
