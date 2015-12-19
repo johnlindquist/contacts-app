@@ -6,7 +6,7 @@ import {Validators} from "angular2/common";
 import {EventEmitter} from "angular2/core";
 @Component({
   selector: 'contact-edit',
-  template: `<div *ngIf="contact">
+  template: `<div class="contact-edit" *ngIf="contact">
 
   <form [ngFormModel]="contactForm" (submit)="update.emit(contactForm.value)">
 
@@ -32,6 +32,12 @@ import {EventEmitter} from "angular2/core";
       <input ngControl="avatar" type="url" class="form-control" id="avatar" placeholder="An Image URL">
     </fieldset>
 
+    <fieldset class="form-group">
+      <label for="lorem">Description</label>
+      <textarea ngControl="lorem" type="url" class="form-control" id="lorem" placeholder="A description..."></textarea>
+    </fieldset>
+
+
     <button type="submit">Submit</button>
 
   </form>
@@ -48,12 +54,17 @@ export class ContactEdit {
   @Output() update = new EventEmitter();
 
   constructor(public builder:FormBuilder) {
+    console.log('contact-edit');
+  }
+
+  routerCanReuse() {
+    return false;
   }
 
 
   ngOnChanges(change) {
     if (change.contact.currentValue) {
-      const {id, name:{first, last}, email, avatar} = change.contact.currentValue;
+      const {id, name:{first, last}, email, avatar, lorem} = change.contact.currentValue;
 
       this.contactForm = this.builder.group({
         id: [id],
@@ -63,6 +74,7 @@ export class ContactEdit {
         }),
         email: [email, Validators.required],
         avatar: [avatar, Validators.required],
+        lorem: [lorem, Validators.required],
       });
 
     }

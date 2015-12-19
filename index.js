@@ -42,11 +42,10 @@ var server = jsonServer.create();
 // Set default middlewares (logger, static, cors and no-cache)
 server.use(jsonServer.defaults());
 
-// Add custom routes
-//server.post('/new', function (req, res) {
-//    people.push(generatePerson(people.length));
-//    res.json({ msg: 'hello' })
-//});
+ //Add custom routes
+server.get('/random', function (req, res) {
+    res.json(generatePerson())
+});
 var router = jsonServer.router(people);
 server.use(router);
 

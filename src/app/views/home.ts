@@ -20,27 +20,57 @@ import {ContactService} from "../services/contacts-service";
   directives: [ContactList, ContactCard, ROUTER_DIRECTIVES],
   template: `
   <style>
-    .container{
+    .home{
+      max-width: 1040px;
+      margin-left: auto;
+      margin-right: auto;
       border: 2px solid #d1d1d3;
       display: flex;
       flex-direction: row;
+      padding: 0;
+    }
+
+    .left{
+      display: flex;
+      flex-direction: column;
+    }
+
+    .right{
+      width: 100%;
     }
   </style>
-  <div class="container">
-    <contact-list
-      [contacts]="service.contactsStore | async"
-      (select)="onSelect($event)"
-      [selectedContact]="service.selectedContactStore | async"
-    ></contact-list>
+  <div class="home">
+      <div class="left">
+      <button class="btn-primary" (click)="onAdd()">Add New Contact</button>
+      <contact-list
+        [contacts]="service.contactsStore | async"
+        (select)="onSelect($event)"
+        [selectedContact]="service.selectedContactStore | async"
+      ></contact-list>
+    </div>
 
-    <router-outlet></router-outlet>
+    <div class="right">
+      <router-outlet></router-outlet>
+    </div>
+
   </div>`
 })
 export class Home {
+  onAdd(){
+    this.router.navigate(['./ContactNew'])
+  }
+
   onSelect(contact) {
     this.router.navigate(['./ContactCard', {id: contact.id}])
   }
 
   constructor(public router:Router, public service:ContactService) {
+    this.service.postContactStore.subscribe((contact)=> {
+      this.router.navigate(['./ContactCard', {id: contact.id}])
+    });
+
+    this.service.putContactStore.subscribe((contact)=> {
+      this.router.navigate(['./ContactCard', {id: contact.id}])
+    });
   }
 }

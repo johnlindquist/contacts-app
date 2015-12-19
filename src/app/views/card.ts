@@ -9,6 +9,7 @@ import {ContactService} from "../services/contacts-service";
 @Component({
   directives: [ContactCard, ContactEdit],
   template: `
+
     <div [ngSwitch]="routeData.get('state')">
       <contact-card
         *ngSwitchWhen="'view'"
@@ -19,6 +20,12 @@ import {ContactService} from "../services/contacts-service";
       <contact-edit
         *ngSwitchWhen="'edit'"
         [contact]="service.selectedContactStore | async"
+        (update)="onUpdate($event)"
+      >
+      </contact-edit>
+      <contact-edit
+        *ngSwitchWhen="'new'"
+        [contact]="service.randomStore | async"
         (update)="onUpdate($event)"
       >
       </contact-edit>
@@ -40,15 +47,24 @@ export class Card {
     this.router.navigate(['../ContactEdit', {id: contact.id}])
   }
 
-  onUpdate(event){
-    this.service.putContact.subscribe((contact)=>{
-      this.router.navigate(['../ContactCard', {id:contact.id}])
-    });
-
-    this.service.putContactSubject.next(event);
+  onUpdate(contact){
+    console.log('onUpdate');
+    if(contact.id){
+      this.service.putContactSubject.next(contact);
+    }else{
+      this.service.postContactSubject.next(contact);
+    }
   }
 
   constructor(routeParams:RouteParams, public service:ContactService, public routeData:RouteData, public router:Router) {
-    service.loadContactSubject.next(routeParams.get('id'));
+    const id = routeParams.get('id');
+
+    //if we have an id, we're editing. If not, we're creating a new contact.
+    if(id) {
+      service.loadContactSubject.next(id);
+
+    }else{
+      this.service.randomSubject.next();
+    }
   }
 }

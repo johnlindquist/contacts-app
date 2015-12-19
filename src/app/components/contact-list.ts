@@ -16,6 +16,7 @@ import {ContactRenderer} from "./contact-renderer";
     height: 600px;
     width: 400px;
     overflow-y: auto;
+    margin-left: 10px;
   }
 
   h2 {
